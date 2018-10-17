@@ -13,10 +13,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -35,8 +37,6 @@ import example.com.universitytimetable.OkHttp.IRequest;
 import example.com.universitytimetable.OkHttp.IResponse;
 import example.com.universitytimetable.OkHttp.MyOkHttpClient;
 import example.com.universitytimetable.OkHttp.MyRequest;
-import example.com.universitytimetable.OkHttp.MyResponse;
-import example.com.universitytimetable.OkHttp.OnResultListener;
 
 
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
@@ -53,6 +53,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+
+    public static enum handler_key {
+
+        /** 登录 */
+        LOGIN,
+
+        /** 自动登录 */
+        AUTO_LOGIN,
+
+        /** 第三方登录 */
+        THRED_LOGIN,
+
+    }
+
 
 
     /******************************************************************************************111*/
@@ -91,6 +105,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onResume() {
         super.onResume();
+        autoLogin();
 
     }
 
@@ -247,14 +262,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {  //执行耗时任务  子线程
             // 尝试对网络服务进行身份验证。
-            IRequest request = new MyRequest("http://47.100.13.155:8080/TimeTable/add");
-            request.setBody("userId", userId);
-            request.setBody("password", mPassword);
-            IHttpClient mHttpClient = new MyOkHttpClient();
-            IResponse response1 = mHttpClient.post(request);
-            if (response1.getData().equals("okAdd")) {
-                return true;
-            }
+
             return false;
         }
 
@@ -283,6 +291,40 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(false);
         }
     }
+
+
+    private void autoLogin() {
+
+        SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+        if (TextUtils.isEmpty(pref.getString("userId", "")) || TextUtils.isEmpty(pref.getString("password", ""))) {
+            return;
+        }
+        showProgress(true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+                IRequest request = new MyRequest("http://47.100.13.155:8080/TimeTable/autoLogin");
+                request.setBody("userId", pref.getString("userId", ""));
+                request.setBody("password",pref.getString("password", ""));
+                IHttpClient mHttpClient = new MyOkHttpClient();
+                IResponse response1 = mHttpClient.post(request);
+                if (response1.getData().equals("ok")) {
+                   runOnUiThread(new Runnable() {
+                       @Override
+                       public void run() {
+                           showProgress(false);
+                           Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                           startActivity(intent);
+                           finish();
+                       }
+                   });
+                }
+            }
+        }).start();
+
+    }
+
 
 
 }
