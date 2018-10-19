@@ -262,7 +262,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {  //执行耗时任务  子线程
             // 尝试对网络服务进行身份验证。
-
+            IRequest request = new MyRequest("http://47.100.13.155:8080/TimeTable/autoLogin");
+            request.setBody("userId", userId);
+            request.setBody("password", mPassword);
+            IHttpClient mHttpClient = new MyOkHttpClient();
+            IResponse response1 = mHttpClient.post(request);
+            if (response1.getData().equals("ok")) {
+                return true;
+            }
             return false;
         }
 

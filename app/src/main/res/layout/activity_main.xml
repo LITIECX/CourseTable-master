@@ -25,7 +25,7 @@
     <com.cjj.MaterialRefreshLayout
         android:id="@+id/mFreshLayout"
         app:overlay="true"
-        app:wave_color="@color/transparent"
+        app:wave_color="@color/c4"
         app:wave_height_type="higher"
         app:wave_show="true"
         android:layout_width="match_parent"
