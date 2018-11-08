@@ -54,20 +54,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
 
-    public static enum handler_key {
-
-        /** 登录 */
-        LOGIN,
-
-        /** 自动登录 */
-        AUTO_LOGIN,
-
-        /** 第三方登录 */
-        THRED_LOGIN,
-
-    }
-
-
 
     /******************************************************************************************111*/
     @Override

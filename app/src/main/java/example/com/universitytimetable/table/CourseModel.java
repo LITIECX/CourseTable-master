@@ -5,6 +5,8 @@ package example.com.universitytimetable.table;
  */
 public class CourseModel {
 
+
+
     private long id; //课程ID
     private String courseName;
     private int section; //从第几节课开始

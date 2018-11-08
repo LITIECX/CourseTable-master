@@ -13,9 +13,8 @@
 
     <LinearLayout
         android:id="@+id/weekNames"
-
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:orientation="horizontal"
         android:weightSum="7.8"/>
 

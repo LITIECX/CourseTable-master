@@ -1,10 +1,10 @@
 package example.com.universitytimetable;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -14,6 +14,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,18 +34,26 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
+import example.com.universitytimetable.Notification.NotificationUtils;
 import example.com.universitytimetable.OkHttp.IHttpClient;
 import example.com.universitytimetable.OkHttp.IRequest;
 import example.com.universitytimetable.OkHttp.MyOkHttpClient;
 import example.com.universitytimetable.OkHttp.MyRequest;
 import example.com.universitytimetable.OkHttp.MyResponse;
 import example.com.universitytimetable.OkHttp.OnResultListener;
+import example.com.universitytimetable.listener.ScreenListener;
+import example.com.universitytimetable.service.MyService;
+import example.com.universitytimetable.service.ServiceUtils;
 import example.com.universitytimetable.table.ColorUtils;
 import example.com.universitytimetable.table.CornerTextView;
 import example.com.universitytimetable.table.CourseData;
 import example.com.universitytimetable.table.CourseModel;
+import example.com.universitytimetable.table.TableData;
+import example.com.universitytimetable.table.TableUtils;
+import example.com.universitytimetable.time.TimeUnit;
 
-public class MainActivity extends AppCompatActivity  implements NavigationView.OnNavigationItemSelectedListener{
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     @BindView(R.id.weekNames)
     LinearLayout weekNames;
@@ -62,7 +71,9 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
     private int itemHeight;
     private int maxSection = 12;
     private boolean num = false;  //控制刷新
-
+    private TextView name;
+    private TextView textView;
+    private ScreenListener mscreenListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +83,8 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        name = (TextView) findViewById(R.id.name);
+        textView = (TextView) findViewById(R.id.textView);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -84,11 +97,8 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-
         ButterKnife.bind(this);
         itemHeight = getResources().getDimensionPixelSize(R.dimen.sectionHeight);
         initWeekNameView();  //顶部周一到周日的布局
@@ -96,8 +106,40 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
 //        initWeekCourseView(); //初始化课程表
         setRefreshListener(); //下拉刷新
         getTable();
+//        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+//        RequstModel requstModel = new RequstModel();
+//        requstModel.model( pref.getString("userId", ""));
+        Intent intent = new Intent(MainActivity.this, MyService.class);
+        startService(intent);
+        Log.d("lttt", "onCreate: 开始执行");
+        screenLister();
     }
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Intent intent = new Intent(this, MyService.class);
+        stopService(intent);
+        mscreenListener.unregisterListener();  //注销屏幕监听
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
+                TableData tableData = new TableUtils().nestTable(pref.getString("userId", ""));
+                String content = tableData.getClassRoom() + "@" + tableData.getCourse();
+                String title = "周" + tableData.getWeek() + "@第" + tableData.getSection() + "节";
+                NotificationUtils notificationUtils = new NotificationUtils(MyApplication.getContext());
+                notificationUtils.sendNotification(title, content);  //发出通知
+            }
+        }).start();
+    }
 
     /**
      * 初始化课程表
@@ -106,7 +148,6 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         for (int i = 0; i < mWeekViews.size(); i++) {
             initWeekPanel(mWeekViews.get(i), data[i]);
         }
-
     }
 
     /**
@@ -119,12 +160,12 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         mFreshLayout.setMaterialRefreshListener(new MaterialRefreshListener() {
             @Override
             public void onRefresh(MaterialRefreshLayout materialRefreshLayout) {
-                SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+                SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
                 clearChildView();
 //                initWeekCourseView();
                 IRequest request = new MyRequest("http://47.100.13.155:8080/TimeTable/findAll");
-                request.setBody("userId", pref.getString("userId",""));
-                request.setBody("weekInfo","11");
+                request.setBody("userId", pref.getString("userId", ""));
+                request.setBody("weekInfo", new TimeUnit().week());
                 IHttpClient mHttpClient = new MyOkHttpClient();
                 mHttpClient.post(request, new OnResultListener<MyResponse>() {
                     @Override
@@ -140,6 +181,7 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
                             }
                         });
                     }
+
                     @Override
                     public void onError(Exception error) {
 
@@ -177,7 +219,7 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
                 }
             } else {
                 lp.weight = 0.8f;
-                tvWeekName.setText(getMonth() + "月");
+                tvWeekName.setText(new TimeUnit().week() + "周");
             }
             tvWeekName.setGravity(Gravity.CENTER_HORIZONTAL);
             tvWeekName.setLayoutParams(lp);
@@ -336,10 +378,10 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
     }
 
     public void getTable() {
-        SharedPreferences pref = getSharedPreferences("data",MODE_PRIVATE);
+        SharedPreferences pref = getSharedPreferences("data", MODE_PRIVATE);
         IRequest request = new MyRequest("http://47.100.13.155:8080/TimeTable/findAll");
-        request.setBody("userId",pref.getString("userId",""));
-        request.setBody("weekInfo","11");
+        request.setBody("userId", pref.getString("userId", ""));
+        request.setBody("weekInfo", new TimeUnit().week());
         IHttpClient mHttpClient = new MyOkHttpClient();
         mHttpClient.post(request, new OnResultListener<MyResponse>() {
             @Override
@@ -353,6 +395,7 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
                     }
                 });
             }
+
             @Override
             public void onError(Exception error) {
                 showToast("查询错误，请在尝试");
@@ -412,9 +455,54 @@ public class MainActivity extends AppCompatActivity  implements NavigationView.O
         } else if (id == R.id.nav_send) {
 
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    public void notification(String data, String str) {
+        NotificationUtils notificationUtils = new NotificationUtils(this);
+        notificationUtils.sendNotification(str, data);
+
+    }
+
+    public void screenLister() {
+        Log.d("lttt", "screenLister:锁屏监控启动 ");
+        mscreenListener = new ScreenListener(MyApplication.getContext());
+        mscreenListener.begin(new ScreenListener.ScreenStateListener() {
+            @Override
+            public void onScreenOn() {
+                Log.d("lttt", "onScreenOn:亮屏 ");
+                ServiceUtils serviceUtils = new ServiceUtils();
+                boolean st = serviceUtils.isServiceRunning(MyApplication.getContext(),
+                        "example.com.universitytimetable.service.MyService");
+                Log.d("lttt", "onScreenOn: 服务是否启动" + st);
+                if (st == false) {
+                    Intent intent = new Intent(MainActivity.this, MyService.class);
+                    startService(intent);
+                }
+            }
+            @Override
+            public void onScreenOff() {
+                Log.d("lttt", "onScreenOn:关锁 ");
+            }
+
+            @Override
+            public void onUserPresent() {
+                Log.d("lttt", "onUserPresent: 解锁");
+                ServiceUtils serviceUtils = new ServiceUtils();
+                boolean st = serviceUtils.isServiceRunning(MyApplication.getContext(),
+                        "example.com.universitytimetable.service.MyService");
+                Log.d("lttt", "onUserPresent:查看服务启动情况 " + st);
+                if (st == false) {
+                    Intent intent = new Intent(MainActivity.this, MyService.class);
+                    startService(intent);
+                }
+
+            }
+        });
+
+    }
+
+
 }
