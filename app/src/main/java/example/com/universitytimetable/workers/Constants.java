@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package example.com.universitytimetable;
+package example.com.universitytimetable.workers;
 
 public final class Constants {
 

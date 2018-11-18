@@ -52,7 +52,6 @@ import example.com.universitytimetable.table.TableData;
 import example.com.universitytimetable.table.TableUtils;
 import example.com.universitytimetable.time.TimeUnit;
 
-
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     @BindView(R.id.weekNames)
@@ -67,7 +66,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @BindViews({R.id.weekPanel_1, R.id.weekPanel_2, R.id.weekPanel_3, R.id.weekPanel_4,
             R.id.weekPanel_5, R.id.weekPanel_6, R.id.weekPanel_7})
     List<LinearLayout> mWeekViews;
-
     private int itemHeight;
     private int maxSection = 12;
     private boolean num = false;  //控制刷新
@@ -79,12 +77,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        name = (TextView) findViewById(R.id.name);
-        textView = (TextView) findViewById(R.id.textView);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -111,8 +107,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 //        requstModel.model( pref.getString("userId", ""));
         Intent intent = new Intent(MainActivity.this, MyService.class);
         startService(intent);
-        Log.d("lttt", "onCreate: 开始执行");
         screenLister();
+
     }
 
 
@@ -439,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
+
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
@@ -472,37 +468,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mscreenListener.begin(new ScreenListener.ScreenStateListener() {
             @Override
             public void onScreenOn() {
-                Log.d("lttt", "onScreenOn:亮屏 ");
-                ServiceUtils serviceUtils = new ServiceUtils();
-                boolean st = serviceUtils.isServiceRunning(MyApplication.getContext(),
-                        "example.com.universitytimetable.service.MyService");
-                Log.d("lttt", "onScreenOn: 服务是否启动" + st);
-                if (st == false) {
-                    Intent intent = new Intent(MainActivity.this, MyService.class);
-                    startService(intent);
-                }
+
             }
             @Override
             public void onScreenOff() {
-                Log.d("lttt", "onScreenOn:关锁 ");
-            }
 
+            }
             @Override
             public void onUserPresent() {
-                Log.d("lttt", "onUserPresent: 解锁");
                 ServiceUtils serviceUtils = new ServiceUtils();
                 boolean st = serviceUtils.isServiceRunning(MyApplication.getContext(),
                         "example.com.universitytimetable.service.MyService");
-                Log.d("lttt", "onUserPresent:查看服务启动情况 " + st);
-                if (st == false) {
-                    Intent intent = new Intent(MainActivity.this, MyService.class);
-                    startService(intent);
-                }
-
+                Intent intent = new Intent(MainActivity.this, MyService.class);
+                startService(intent);
             }
         });
 
     }
-
 
 }

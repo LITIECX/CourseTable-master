@@ -29,6 +29,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +40,7 @@ import example.com.universitytimetable.OkHttp.IRequest;
 import example.com.universitytimetable.OkHttp.IResponse;
 import example.com.universitytimetable.OkHttp.MyOkHttpClient;
 import example.com.universitytimetable.OkHttp.MyRequest;
+import example.com.universitytimetable.User.UserData;
 
 
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
@@ -53,7 +57,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-
+    private UserData userData;
 
     /******************************************************************************************111*/
     @Override
@@ -248,12 +252,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {  //执行耗时任务  子线程
             // 尝试对网络服务进行身份验证。
-            IRequest request = new MyRequest("http://47.100.13.155:8080/TimeTable/autoLogin");
+            IRequest request = new MyRequest("http://47.100.13.155:8080/TimeTable/userLogin");
             request.setBody("userId", userId);
             request.setBody("password", mPassword);
             IHttpClient mHttpClient = new MyOkHttpClient();
             IResponse response1 = mHttpClient.post(request);
-            if (response1.getData().equals("ok")) {
+            if (response1.getData()!= null) {
+                try {
+                    Gson gson =new Gson();
+                    userData =gson.fromJson(response1.getData(),UserData.class);
+                } catch (JsonSyntaxException e) {
+                    e.printStackTrace();
+                }
                 return true;
             }
             return false;
@@ -266,8 +276,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (success) {  //登录成功，保存数据，跳转到首页。
                 SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE)
                         .edit();
-                editor.putString("userId", userId);
-                editor.putString("password", mPassword);
+                editor.putString("userId", userData.getStudentId());
+                editor.putString("password", userData.getPassword());
+                editor.putString("name", userData.getName());
                 editor.apply();
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);

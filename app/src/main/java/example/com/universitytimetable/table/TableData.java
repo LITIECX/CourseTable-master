@@ -1,6 +1,8 @@
 package example.com.universitytimetable.table;
 
-public class TableData {
+
+
+public class TableData  {
 
     private long id;
 
@@ -23,7 +25,6 @@ public class TableData {
     private int week; //周几
     private int section; //从第几节课开始
     private int sectionSpan; //跨几节课
-
 
     public int getOneTow() {
         return oneTow;

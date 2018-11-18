@@ -3,6 +3,7 @@ package example.com.universitytimetable;
 import android.app.Application;
 import android.content.Context;
 
+
 public class MyApplication extends Application {
 
     private  static Context context;
@@ -11,6 +12,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         context = getApplicationContext();
         super.onCreate();
+
     }
 
     public static  Context getContext(){

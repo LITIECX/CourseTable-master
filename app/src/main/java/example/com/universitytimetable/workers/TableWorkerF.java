@@ -22,7 +22,7 @@ public class TableWorkerF extends Worker{
         Context applicationContext = getApplicationContext();
         String title = "智能提醒准时为你关闭";
         String message = "请打开APP查课表，记得明天早起打开APP唤醒我";
-        WorkerUtils.makeStatusNotification(title, message, applicationContext,3);  //发出通知
+        WorkerUtils.makeStatusNotification(title, message, applicationContext,1);  //发出通知
 
 
         return Worker.Result.SUCCESS;

@@ -24,8 +24,8 @@ public class TableWorkerC extends Worker {
         TableData tableData = new TableUtils().nestTable(id);
         String content = tableData.getClassRoom() + "@" + tableData.getCourse();
         String title = "周" + tableData.getWeek() + "@第" + tableData.getSection() + "节";
-
-        WorkerUtils.makeStatusNotification(title, content, applicationContext,2);  //发出通知
+        WorkerUtils.sleep(1000);
+        WorkerUtils.makeStatusNotification(title, content, applicationContext,1);  //发出通知
         Data responseData = new Data.Builder().putString("response", "ok").build();  //返回结果
         setOutputData(responseData);
 

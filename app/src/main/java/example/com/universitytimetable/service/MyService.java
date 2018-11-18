@@ -16,6 +16,8 @@ import example.com.universitytimetable.OkHttp.MyRequest;
 import example.com.universitytimetable.OkHttp.MyResponse;
 import example.com.universitytimetable.OkHttp.OnResultListener;
 import example.com.universitytimetable.table.TableData;
+import example.com.universitytimetable.workers.RequstModel;
+
 public class MyService extends Service {
 
     @Override

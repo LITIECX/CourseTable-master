@@ -23,9 +23,8 @@ import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
-import example.com.universitytimetable.Constants;
-import static example.com.universitytimetable.Constants.CHANNEL_ID;
-import static example.com.universitytimetable.Constants.DELAY_TIME_MILLIS;
+import static example.com.universitytimetable.workers.Constants.CHANNEL_ID;
+import static example.com.universitytimetable.workers.Constants.DELAY_TIME_MILLIS;
 
 
 final class WorkerUtils {
@@ -65,9 +64,9 @@ final class WorkerUtils {
     /**
      * 睡眠延时
      */
-    static void sleep() {
+    static void sleep(long time) {
         try {
-            Thread.sleep(DELAY_TIME_MILLIS, 0);
+            Thread.sleep(time, 0);
         } catch (InterruptedException e) {
 
         }

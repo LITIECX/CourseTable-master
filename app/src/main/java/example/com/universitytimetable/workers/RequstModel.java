@@ -46,10 +46,10 @@ public class RequstModel {
         } else {
             cou = 6;
         }
+        cou = 1;
         OneTimeWorkRequest testWorker = new OneTimeWorkRequest.Builder(TableWorker.class)
                 .setInputData(data)
                 .addTag("cleanup")  //为请求设置tag以方便获取任务执行'状态和取消
-                .setInitialDelay(5, TimeUnit.SECONDS)  //延时执行worker
                 .build();
         workContinuation = mWorkManager.beginWith(testWorker);
         switch (cou) {
@@ -57,35 +57,35 @@ public class RequstModel {
                 OneTimeWorkRequest testWorkerA = new OneTimeWorkRequest.Builder(TableWorkerA.class)
                         .setInputData(data)
                         .addTag("cleanup")  //为请求设置tag以方便获取任务执行'状态和取消
-                        .setInitialDelay(setAlarm(8, 31), TimeUnit.SECONDS)  //延时执行worker
+                        .setInitialDelay(setAlarm(9, 10), TimeUnit.SECONDS)  //延时执行worker831
                         .build();
                 workContinuation = workContinuation.then(testWorkerA);
             case 2:
                 OneTimeWorkRequest testWorkerB = new OneTimeWorkRequest.Builder(TableWorkerB.class)
                         .setInputData(data)
                         .addTag("cleanup")  //为请求设置tag以方便获取任务执行'状态和取消
-                        .setInitialDelay(setAlarm(10, 31), TimeUnit.SECONDS)  //延时执行worker
+                        .setInitialDelay(setAlarm(9, 15), TimeUnit.SECONDS)  //延时执行worker 1031
                         .build();
                 workContinuation = workContinuation.then(testWorkerB);
             case 3:
                 OneTimeWorkRequest testWorkerC = new OneTimeWorkRequest.Builder(TableWorkerC.class)
                         .setInputData(data)
                         .addTag("cleanup")  //为请求设置tag以方便获取任务执行'状态和取消
-                        .setInitialDelay(setAlarm(14, 01), TimeUnit.SECONDS)  //延时执行worker
+                        .setInitialDelay(setAlarm(17, 20), TimeUnit.SECONDS)  //延时执行worker 1401
                         .build();
                 workContinuation = workContinuation.then(testWorkerC);
             case 4:
                 OneTimeWorkRequest testWorkerD = new OneTimeWorkRequest.Builder(TableWorkerD.class)
                         .setInputData(data)
                         .addTag("cleanup")  //为请求设置tag以方便获取任务执行'状态和取消
-                        .setInitialDelay(setAlarm(16, 01), TimeUnit.SECONDS)  //延时执行worker
+                        .setInitialDelay(setAlarm(17, 25), TimeUnit.SECONDS)  //延时执行worker 1601
                         .build();
                 workContinuation = workContinuation.then(testWorkerD);
             case 5:
                 OneTimeWorkRequest testWorkerE = new OneTimeWorkRequest.Builder(TableWorkerE.class)
                         .setInputData(data)
                         .addTag("cleanup")  //为请求设置tag以方便获取任务执行'状态和取消
-                        .setInitialDelay(setAlarm(17, 41), TimeUnit.SECONDS)  //延时执行worker
+                        .setInitialDelay(setAlarm(11, 15), TimeUnit.SECONDS)  //延时执行worker 1701
                         .build();
                 workContinuation = workContinuation.then(testWorkerE);
                 workContinuation.enqueue();
